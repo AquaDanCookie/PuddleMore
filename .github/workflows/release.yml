@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish Linux release
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 'PuddleTag Source Code/rust'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libtagc0-dev libxkbcommon-dev libwayland-dev libx11-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-x11-dev libgl1-mesa-dev libegl1-mesa-dev
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Package release
+        run: |
+          set -euo pipefail
+          mkdir -p dist release
+          jq_filter=".packages[].targets[] | select(.kind[] == \"bin\") | .name"
+          mapfile -t bins < <(cargo metadata --no-deps --format-version 1 | jq -r "$jq_filter")
+          if [ ${#bins[@]} -eq 0 ]; then
+            echo "No binary targets found." >&2
+            exit 1
+          fi
+          for bin in "${bins[@]}"; do
+            cp "target/release/${bin}" dist/
+          done
+          for doc in README README.md README.txt LICENSE LICENSE.md COPYING; do
+            if [ -f "$doc" ]; then
+              cp "$doc" dist/
+            fi
+          done
+          tag=$(printf "%s" "$GITHUB_REF_NAME" | tr "/" "-")
+          repo="${GITHUB_REPOSITORY#*/}"
+          tar -C dist -czf "release/${repo}-${tag}-x86_64-linux.tar.gz" .
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: 'PuddleTag Source Code/rust/release/*.tar.gz'
+          generate_release_notes: true
