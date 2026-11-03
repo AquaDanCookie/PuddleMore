@@ -11,6 +11,10 @@ jobs:
   release:
     name: Build and publish Linux release
     runs-on: ubuntu-latest
+    env:
+      LIBRARY_PATH: /usr/local/lib
+      LD_LIBRARY_PATH: /usr/local/lib
+      PKG_CONFIG_PATH: /usr/local/lib/pkgconfig
     defaults:
       run:
         working-directory: 'PuddleTag Source Code/rust'
@@ -21,7 +25,15 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libtagc0-dev libxkbcommon-dev libwayland-dev libx11-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-x11-dev libgl1-mesa-dev libegl1-mesa-dev
+          sudo apt-get install -y cmake g++ zlib1g-dev libxkbcommon-dev libwayland-dev libx11-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-x11-dev libgl1-mesa-dev libegl1-mesa-dev
+
+      - name: Build TagLib 2
+        run: |
+          git clone --depth 1 --branch v2.0.2 --recurse-submodules --shallow-submodules https://github.com/taglib/taglib.git /tmp/taglib
+          cmake -S /tmp/taglib -B /tmp/taglib-build -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+          cmake --build /tmp/taglib-build -j2
+          sudo cmake --install /tmp/taglib-build
+          sudo ldconfig
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
