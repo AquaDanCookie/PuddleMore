@@ -1,0 +1,6 @@
+/rust/target/
+.idea/
+.vscode/
+*.swp
+*.tmp
+*.bak

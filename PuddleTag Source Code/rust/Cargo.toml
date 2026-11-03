@@ -1,0 +1,23 @@
+[package]
+name = "puddlemore"
+version = "0.1.0"
+edition = "2021"
+description = "PuddleMore audio tag editor (Rust core)"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+anyhow = "1"
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+libc = "0.2"
+lofty = "0.25"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "tiff"] }
+rfd = "0.17"
+regex = "1"
+pathdiff = "0.2"
+memmap2 = "0.9"
+serde_json = "1"
+walkdir = "2"
+
+[profile.release]
+opt-level = 2
+lto = false

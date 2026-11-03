@@ -1,0 +1,16 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=PuddleMore
+TryExec=PuddleMore
+Exec=PuddleMore %F
+Icon=PuddleMore
+GenericName=Audio Tag Editor
+Comment=PuddleMore - spreadsheet-style tag editor for MP3, FLAC, M4A, WMA, Ogg, Opus, AIFF, TTA and Matroska
+Terminal=false
+StartupNotify=true
+StartupWMClass=PuddleMore
+MimeType=inode/directory;audio/x-ape;audio/x-wavpack;audio/x-musepack;audio/mpeg;audio/x-mpeg;audio/x-wav;audio/wav;audio/x-aiff;audio/x-aifc;audio/x-dsf;audio/x-dff;audio/mp4;audio/x-m4a;audio/x-m4b;video/mp4;video/x-m4v;audio/ogg;application/ogg;audio/flac;audio/x-opus+ogg;audio/x-ms-wma;video/x-ms-wmv;video/x-ms-asf;audio/x-matroska;video/x-matroska;video/webm;audio/webm;audio/x-tta;
+Categories=AudioVideo;Audio;
+Keywords=tagger;mp3tag;music;metadata;matroska;flac;mp3;tta;aiff;rust;
