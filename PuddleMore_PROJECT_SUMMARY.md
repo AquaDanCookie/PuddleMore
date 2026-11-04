@@ -56,9 +56,9 @@ its own version (`0.2.0`) rather than the upstream puddletag version.
 
 ## Relevant files
 
-- `PuddleMore` — primary launcher.
-- `puddlemore_main.py` — PyQt6 entry point.
-- `puddlestuff/` — puddletag UI and metadata layer.
-- `puddlestuff/theme.py` — PuddleMore themes.
-- `puddlestuff/audioinfo/rustbridge.py` — Rust format adapter.
-- `rust/` — Rust engine, CLI and standalone egui UI.
+- `PuddleMore` - primary launcher.
+- `puddlemore_main.py` - PyQt6 entry point.
+- `puddlestuff/` - puddletag UI and metadata layer.
+- `puddlestuff/theme.py` - PuddleMore themes.
+- `puddlestuff/audioinfo/rustbridge.py` - Rust format adapter.
+- `rust/` - Rust engine, CLI and standalone egui UI.
