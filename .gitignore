@@ -1,3 +1,11 @@
 .opencode/
-target/
 .env
+.venv/
+__pycache__/
+*.py[cod]
+target/
+*.swp
+*.tmp
+*.bak
+.idea/
+.vscode/

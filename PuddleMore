@@ -1,0 +1,34 @@
+#!/bin/sh
+# PuddleMore launcher — puddletag PyQt6 interface with PuddleMore extras.
+SELF="$0"
+while [ -h "$SELF" ]; do
+    LINK_DIR="$(cd -P "$(dirname "$SELF")" && pwd)"
+    LINK="$(readlink "$SELF")"
+    case "$LINK" in
+        /*) SELF="$LINK" ;;
+        *) SELF="$LINK_DIR/$LINK" ;;
+    esac
+done
+DIR="$(cd -P "$(dirname "$SELF")" && pwd)"
+cd "$DIR"
+
+if [ ! -x "$DIR/rust/target/release/puddlemore" ]; then
+    CARGO="${CARGO:-cargo}"
+    if ! command -v "$CARGO" >/dev/null 2>&1; then
+        CARGO="$HOME/.cargo/bin/cargo"
+    fi
+    if [ -x "$CARGO" ]; then
+        (cd "$DIR/rust" && "$CARGO" build --release >/dev/null 2>&1) || true
+    fi
+fi
+
+if [ -x "$DIR/.venv/bin/python" ]; then
+    PYTHON="$DIR/.venv/bin/python"
+elif command -v python3 >/dev/null 2>&1; then
+    PYTHON=python3
+else
+    echo "PuddleMore: Python 3 with PyQt6 is required." >&2
+    exit 1
+fi
+
+exec "$PYTHON" -O puddlemore_main.py "$@"

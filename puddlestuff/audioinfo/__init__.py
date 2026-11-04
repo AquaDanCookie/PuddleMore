@@ -1,0 +1,164 @@
+from copy import deepcopy
+
+import mutagen
+
+from .constants import *
+from .util import *
+
+AbstractTag = MockTag
+
+extensions = {}
+options = []
+
+mapping = {}
+revmapping = {}
+
+
+def loadmapping(filepath, default=None):
+    try:
+        lines = open(filepath, 'r').read().split('\n')
+    except (IOError, OSError):
+        if default:
+            return default
+        else:
+            return {}
+    mappings = {}
+    for l in lines:
+        tags = [z.strip() for z in l.split(',')]
+        if len(tags) == 3:  # Tag, Source, Target
+            try:
+                mappings[tags[0]].update({tags[1]: tags[2]})
+            except KeyError:
+                mappings[tags[0]] = ({tags[1]: tags[2]})
+    return mappings
+
+
+def register_tag(mut_obj, tag, tag_name, tag_exts=None):
+    if isinstance(tag_exts, str):
+        extensions[tag_exts] = [mut_obj, tag, tag_name]
+    elif tag_exts is not None:
+        for e in tag_exts:
+            extensions[e] = [mut_obj, tag, tag_name]
+
+    options.append([mut_obj, tag, tag_name])
+
+
+def setmapping(m):
+    global revmapping
+    global mapping
+
+    mapping = m
+    for z in mapping:
+        revmapping[z] = CaselessDict([(value, key) for key, value in mapping[z].items()])
+    for z in extensions.values():
+        try:
+            if z[2] in mapping:
+                z[1].mapping = mapping[z[2]]
+                z[1].revmapping = revmapping[z[2]]
+            if 'global' in mapping:
+                z[1].mapping.update(mapping['global'])
+                z[1].revmapping.update(revmapping['global'])
+        except IndexError:
+            pass
+
+
+def Tag(filename):
+    """Class that operates on audio tags.
+    Currently supports ogg, mp3, mp4, apev2 and flac files
+
+    It can be used in two ways.
+
+    >>>tag = audioinfo.Tag(filename)
+    Gets the tags in the audio, filename
+    as a dictionary in format {tag: value} in Tag._tags.
+
+    On the other hand, if you have already created
+    a tag object. Use link like so:
+
+    >>>tag = audioinfo.Tag()
+    >>>tag.link(filename)
+    {'artist': "Artist", "track":"12", title:"Title", '__length':"5:14"}
+
+    File info tags like length start with '__'.
+    Images can be accessed by either the '__image' tag or via Tag.images. Note
+    that images aren't included when iterating through Tag.
+
+    Use save to save tags.
+
+    There are caveats associated with each module, so check out their docstrings
+    for more info."""
+
+    return open_tag(filename)
+
+
+def open_tag(filename, tag_class=lambda kind: kind[1]):
+    """The tag of filename, read with the class its extension is registered
+    with, or else with the one whose kind fits its content best; None if
+    none fits. tag_class picks the class from a registered kind,
+    [mutagen class, tag class, name]."""
+    ext = splitext(filename)
+    if ext in extensions:
+        try:
+            return tag_class(extensions[ext])(filename)
+        except mutagen.MutagenError:
+            # Not the kind its extension says, like an Opus stream in an
+            # .ogg file: let the content decide.
+            pass
+
+    with open(filename, "rb") as fileobj:
+        header = fileobj.read(128)
+        results = [Kind[0].score(filename, fileobj, header) for Kind in options]
+    results = list(zip(results, options))
+    results.sort(key=lambda v: v[0])
+    score, Kind = results[-1]
+    if score > 0:
+        return tag_class(Kind)(filename)
+    else:
+        return None
+
+
+from . import id3, vorbis, apev2, mp4, wma
+
+tag_modules = (id3, vorbis, apev2, mp4, wma)
+
+for m in tag_modules:
+    if hasattr(m, 'filetype'):
+        register_tag(*m.filetype)
+    if hasattr(m, 'filetypes'):
+        list(map(lambda x: register_tag(*x), m.filetypes))
+
+from . import rustbridge
+rustbridge.register()
+
+# PuddleMore extension routing: mutagen handles the content, these are the
+# extra container spellings the original puddletag did not register.
+for extra, base in (('mp1', 'mp3'), ('mp2', 'mp3'), ('wave', 'wav'),
+                    ('m4b', 'm4a'), ('oga', 'ogg'), ('asf', 'wma')):
+    if extra not in extensions and base in extensions:
+        extensions[extra] = extensions[base]
+
+# The fields puddletag shows under another name, by tag type: the name in
+# the file, then puddletag's. A saved mappings file (Preferences, Mappings)
+# replaces it. APEv2's disc and album artist are renamed by its tag class
+# (apev2.FIELDS), so they hold whatever the mapping.
+DEFAULT_MAPPING = {
+    'APEv2': {'musicbrainz_albumid': 'mbrainz_album_id',
+              'musicbrainz_artistid': 'mbrainz_artist_id',
+              'musicbrainz_trackid': 'mbrainz_track_id'},
+    'ID3': {'MusicBrainz Album Id': 'mbrainz_album_id',
+            'MusicBrainz Artist Id': 'mbrainz_artist_id',
+            'ufid:http://musicbrainz.org': 'mbrainz_track_id'},
+    'MP4': {'MusicBrainz Album Id': 'mbrainz_album_id',
+            'MusicBrainz Artist Id': 'mbrainz_artist_id',
+            'MusicBrainz Track Id': 'mbrainz_track_id'},
+    'VorbisComment': {'date': 'year',
+                      'musicbrainz_albumid': 'mbrainz_album_id',
+                      'musicbrainz_artistid': 'mbrainz_artist_id',
+                      'musicbrainz_trackid': 'mbrainz_track_id',
+                      'tracknumber': 'track'},
+}
+
+setmapping(deepcopy(DEFAULT_MAPPING))
+
+_Tag = Tag
+model_tag = lambda x: x

@@ -15,9 +15,6 @@ jobs:
       LIBRARY_PATH: /usr/local/lib
       LD_LIBRARY_PATH: /usr/local/lib
       PKG_CONFIG_PATH: /usr/local/lib/pkgconfig
-    defaults:
-      run:
-        working-directory: 'PuddleTag Source Code/rust'
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -38,33 +35,35 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build release binary
+      - name: Build Rust helper
+        working-directory: rust
         run: cargo build --release
+
+      - name: Compile Python sources
+        env:
+          PYTHONPYCACHEPREFIX: /tmp/pycache
+        run: python3 -m compileall -q puddlestuff puddlemore_main.py
 
       - name: Package release
         run: |
           set -euo pipefail
-          mkdir -p dist release
-          jq_filter=".packages[].targets[] | select(.kind[] == \"bin\") | .name"
-          mapfile -t bins < <(cargo metadata --no-deps --format-version 1 | jq -r "$jq_filter")
-          if [ ${#bins[@]} -eq 0 ]; then
-            echo "No binary targets found." >&2
-            exit 1
-          fi
-          for bin in "${bins[@]}"; do
-            cp "target/release/${bin}" dist/
-          done
-          for doc in README README.md README.txt LICENSE LICENSE.md COPYING; do
-            if [ -f "$doc" ]; then
-              cp "$doc" dist/
-            fi
-          done
-          tag=$(printf "%s" "$GITHUB_REF_NAME" | tr "/" "-")
-          repo="${GITHUB_REPOSITORY#*/}"
-          tar -C dist -czf "release/${repo}-${tag}-x86_64-linux.tar.gz" .
+          tag="${GITHUB_REF_NAME}"
+          name="PuddleMore-${tag}-x86_64-linux"
+          mkdir -p "dist/${name}/rust/target/release" release
+          cp PuddleMore PuddleMore.desktop PuddleMore.png README.md \
+             PuddleMore_PROJECT_SUMMARY.md LICENSE copyright THANKS \
+             requirements.txt puddlemore_main.py "dist/${name}/"
+          cp -r puddlestuff screenshots "dist/${name}/"
+          cp -r rust/src rust/assets "dist/${name}/rust/"
+          cp rust/Cargo.toml rust/Cargo.lock rust/README.md "dist/${name}/rust/"
+          cp rust/target/release/puddlemore "dist/${name}/rust/target/release/"
+          chmod +x "dist/${name}/PuddleMore" "dist/${name}/rust/target/release/puddlemore"
+          find "dist/${name}" -type d -name __pycache__ -prune -exec rm -rf {} +
+          find "dist/${name}" -type f -name '*.py[co]' -delete
+          tar -C dist -czf "release/${name}.tar.gz" "${name}"
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: 'PuddleTag Source Code/rust/release/*.tar.gz'
+          files: 'release/*.tar.gz'
           generate_release_notes: true
