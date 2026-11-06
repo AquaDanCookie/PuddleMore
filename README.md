@@ -1,9 +1,9 @@
 # PuddleMore
 
-![Python](https://emblem.xdan.cc/badge.svg?label=python&message=3.10%2B&look=connected&labelColor=%233D3D3D&color=%2399AAFF)
-![Rust](https://emblem.xdan.cc/badge.svg?label=rust&message=stable&look=connected&labelColor=%233D3D3D&color=%2399AAFF)
-![Platform](https://emblem.xdan.cc/badge.svg?label=platform&message=Linux&look=connected&labelColor=%233D3D3D&color=%2399AAFF)
-![License](https://emblem.xdan.cc/badge.svg?label=license&message=GPL-3.0-or-later&look=connected&labelColor=%233D3D3D&color=%2399AAFF)
+![Python](https://emblem.xdan.cc/badge.svg?label=python&message=3.10%2B&look=connected&labelColor=%233D3D3D&color=%2399AAFF&icon=python)
+![Rust](https://emblem.xdan.cc/badge.svg?label=rust&message=stable&look=connected&labelColor=%233D3D3D&color=%2399AAFF&icon=rust)
+![Platform](https://emblem.xdan.cc/badge.svg?label=platform&message=Linux&look=connected&labelColor=%233D3D3D&color=%2399AAFF&icon=linux)
+![License](https://emblem.xdan.cc/badge.svg?label=license&message=GPL-3.0-or-later&look=connected&labelColor=%233D3D3D&color=%2399AAFF&icon=material-symbols:license)
 
 PuddleMore is a spreadsheet-style audio and video metadata editor for Linux. It
 is a puddletag fork that keeps the original PyQt6 interface and layout, adds
