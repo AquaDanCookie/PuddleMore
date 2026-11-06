@@ -1,9 +1,9 @@
 # PuddleMore
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Rust](https://img.shields.io/badge/rust-stable-orange)
-![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)
-![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)
+![Python](https://emblem.xdan.cc/badge.svg?label=python&message=3.10%2B&look=connected&labelColor=%233D3D3D&color=%2399AAFF)
+![Rust](https://emblem.xdan.cc/badge.svg?label=rust&message=stable&look=connected&labelColor=%233D3D3D&color=%2399AAFF)
+![Platform](https://emblem.xdan.cc/badge.svg?label=platform&message=Linux&look=connected&labelColor=%233D3D3D&color=%2399AAFF)
+![License](https://emblem.xdan.cc/badge.svg?label=license&message=GPL-3.0-or-later&look=connected&labelColor=%233D3D3D&color=%2399AAFF)
 
 PuddleMore is a spreadsheet-style audio and video metadata editor for Linux. It
 is a puddletag fork that keeps the original PyQt6 interface and layout, adds
